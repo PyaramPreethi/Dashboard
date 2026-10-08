@@ -17,6 +17,8 @@ export default function HospitalsPage() {
   }, []);
 
   async function fetchHospitals() {
+    setLoading(true);
+
     const { data, error } = await supabase
       .from("hospitals")
       .select("*")
@@ -24,6 +26,7 @@ export default function HospitalsPage() {
 
     if (error) {
       console.error(error);
+      setLoading(false);
       return;
     }
 
@@ -78,8 +81,38 @@ export default function HospitalsPage() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1 style={{ marginBottom: "20px" }}>Hospitals</h1>
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+          gap: "15px",
+          flexWrap: "wrap",
+        }}
+      >
+        <h1 style={{ margin: 0 }}>Hospitals</h1>
 
+        <Link href="/crm/hospitals/add">
+          <button
+            style={{
+              backgroundColor: "#2563eb",
+              color: "white",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "15px",
+              fontWeight: 600,
+            }}
+          >
+            + Add Hospital
+          </button>
+        </Link>
+      </div>
+
+      {/* Search and Filters */}
       <div
         style={{
           display: "flex",
@@ -135,6 +168,7 @@ export default function HospitalsPage() {
         </select>
       </div>
 
+      {/* Hospital Table */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -157,48 +191,63 @@ export default function HospitalsPage() {
           </thead>
 
           <tbody>
-            {filteredHospitals.map((hospital) => (
-              <tr key={hospital.id}>
-                <td style={cellStyle}>{hospital.hospital_name}</td>
-                <td style={cellStyle}>{hospital.area}</td>
-                <td style={cellStyle}>{hospital.phone}</td>
-                <td style={cellStyle}>{hospital.decision_maker}</td>
-                <td style={cellStyle}>{hospital.priority}</td>
-                <td style={cellStyle}>{hospital.status}</td>
+            {filteredHospitals.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{
+                    textAlign: "center",
+                    padding: "30px",
+                    color: "#666",
+                  }}
+                >
+                  No hospitals found.
+                </td>
+              </tr>
+            ) : (
+              filteredHospitals.map((hospital) => (
+                <tr key={hospital.id}>
+                  <td style={cellStyle}>{hospital.hospital_name}</td>
+                  <td style={cellStyle}>{hospital.area}</td>
+                  <td style={cellStyle}>{hospital.phone}</td>
+                  <td style={cellStyle}>{hospital.decision_maker}</td>
+                  <td style={cellStyle}>{hospital.priority}</td>
+                  <td style={cellStyle}>{hospital.status}</td>
 
-                <td style={cellStyle}>
-                  <Link href={`/crm/hospitals/edit/${hospital.id}`}>
+                  <td style={cellStyle}>
+                    <Link href={`/crm/hospitals/edit/${hospital.id}`}>
+                      <button
+                        style={{
+                          backgroundColor: "#2563eb",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 12px",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          marginRight: "10px",
+                        }}
+                      >
+                        Edit
+                      </button>
+                    </Link>
+
                     <button
                       style={{
-                        backgroundColor: "#2563eb",
+                        backgroundColor: "#dc2626",
                         color: "white",
                         border: "none",
                         padding: "8px 12px",
                         borderRadius: "5px",
                         cursor: "pointer",
-                        marginRight: "10px",
                       }}
+                      onClick={() => deleteHospital(hospital.id)}
                     >
-                      Edit
+                      Delete
                     </button>
-                  </Link>
-
-                  <button
-                    style={{
-                      backgroundColor: "#dc2626",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 12px",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => deleteHospital(hospital.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       )}
